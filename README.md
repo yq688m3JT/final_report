@@ -8,7 +8,7 @@ This repository contains the code and report artifacts for **SmartFlow: Adaptive
 - `smartflow_experiments.py` extends the project to a 3x3 traffic-network simulation with spillback.
 - `results/` stores generated JSON/CSV experiment outputs.
 - `figures/` stores generated appendix figures.
-- `final_report.html` and `final_report.pdf` are the final report artifacts.
+- `final_report.pdf` is the final report artifact. Pages 1-3 are the main text report; appendices and references follow after page 3.
 
 ## Reproduce the Experiments
 

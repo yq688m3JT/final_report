@@ -582,6 +582,7 @@ def write_outputs(slide_rows: dict[str, dict[str, float]], network_rows: list[di
     bars = plt.bar(labels, queues, color=["#7f8c8d", "#95a5a6", "#4f6d7a", "#1f77b4"])
     plt.ylabel("Average network queue")
     plt.title("Network extension: congestion by controller")
+    plt.ylim(0, max(queues) * 1.18)
     plt.xticks(rotation=18, ha="right")
     for bar, value in zip(bars, queues):
         plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1, f"{value:.1f}", ha="center", va="bottom", fontsize=9)
@@ -593,6 +594,7 @@ def write_outputs(slide_rows: dict[str, dict[str, float]], network_rows: list[di
     bars = plt.bar(labels, delays, color=["#7f8c8d", "#95a5a6", "#4f6d7a", "#1f77b4"])
     plt.ylabel("Mean completed-trip delay")
     plt.title("Network extension: delay by controller")
+    plt.ylim(0, max(delays) * 1.18)
     plt.xticks(rotation=18, ha="right")
     for bar, value in zip(bars, delays):
         plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.5, f"{value:.1f}", ha="center", va="bottom", fontsize=9)

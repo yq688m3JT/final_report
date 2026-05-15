@@ -6,7 +6,7 @@
     "avg_switches": 180.0,
     "avg_throughput": 692.8,
     "avg_delay": 15.450021235443126,
-    "experiment_seconds": 15.537577867507935
+    "experiment_seconds": 15.535804748535156
   },
   {
     "policy": "Greedy longest-queue",
@@ -15,7 +15,7 @@
     "avg_switches": 464.1,
     "avg_throughput": 707.25,
     "avg_delay": 8.115820751422955,
-    "experiment_seconds": 15.537578821182251
+    "experiment_seconds": 15.535805940628052
   },
   {
     "policy": "Max-pressure heuristic",
@@ -24,7 +24,7 @@
     "avg_switches": 506.525,
     "avg_throughput": 706.7375,
     "avg_delay": 8.36029630747871,
-    "experiment_seconds": 15.537578821182251
+    "experiment_seconds": 15.535805940628052
   },
   {
     "policy": "Tabular RL network controller",
@@ -33,6 +33,6 @@
     "avg_switches": 540.0,
     "avg_throughput": 706.0,
     "avg_delay": 8.287796660113816,
-    "experiment_seconds": 15.537578821182251
+    "experiment_seconds": 15.535805940628052
   }
 ]
