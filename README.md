@@ -1,28 +1,47 @@
-# SmartFlow Final Project
+# SmartFlow: Adaptive Traffic Signal Control
 
-This repository contains the code and report artifacts for **SmartFlow: Adaptive Traffic Signal Control**.
+This repository contains the Group 19 final project report and code for adaptive traffic signal control. Part I preserves the original single-intersection presentation experiment exactly. Part II adds a coordinated two-intersection traffic corridor to show why reinforcement learning becomes more useful when traffic systems contain delayed interactions and network coordination.
 
-## Files
+This version replaces the earlier root-level prototype layout with the requested final submission structure.
 
-- `legacy_efficiency_experiment.py` reproduces the original single-intersection slide experiment.
-- `smartflow_experiments.py` extends the project to a 3x3 traffic-network simulation with spillback.
-- `results/` stores generated JSON/CSV experiment outputs.
-- `figures/` stores generated appendix figures.
-- `final_report.pdf` is the final report artifact. Pages 1-3 are the main text report; appendices and references follow after page 3.
+## Repository Structure
 
-## Reproduce the Experiments
-
-```bash
-python3 smartflow_experiments.py
+```text
+report/                  Final report source, PDF, bibliography, and figures
+experiments/simple_intersection/
+                         Original single-intersection experiment and slide-exact results
+experiments/complex_network/
+                         Coordinated corridor environment, DQN agent, baselines, and results
+appendix/                Method details and extra result notes outside the three-page body
 ```
 
-The script runs:
+## Run Part I
 
-1. The original slide-validation experiment.
-2. The network extension comparing fixed-time, greedy, max-pressure, and tabular RL controllers.
+```bash
+python experiments/simple_intersection/efficiency_experiment.py
+python experiments/simple_intersection/generate_part1_figures.py
+```
 
-The extension is deterministic under the default seed. Results may vary slightly if the seed, demand scale, horizon, or training episodes are changed.
+The report uses `experiments/simple_intersection/presentation_results.csv` for Part I so the numeric values match the presentation deck exactly.
 
-## Current Key Result
+## Train and Evaluate Part II
 
-In the 3x3 network extension, the learned tabular RL controller reduces average network queue from `42.96` vehicles under fixed-time control to `21.70`, a roughly `49.5%` improvement. Mean completed-trip delay falls from `15.45` to `8.29` time steps, a roughly `46.4%` improvement.
+```bash
+python experiments/complex_network/train_complex_experiment.py
+python experiments/complex_network/evaluate_complex_experiment.py
+python experiments/complex_network/generate_part2_figures.py
+```
+
+The verified run writes `experiments/complex_network/results_complex.csv` and regenerates the Part II figures in `report/figures/`.
+
+## Build the PDF Report
+
+```bash
+python report/build_report_pdf.py
+```
+
+The generated deliverable is `report/final_report.pdf`. The main body is pages 1-3; references and appendix material begin after page 3.
+
+## GitHub Destination
+
+Submission repository: `https://github.com/yq688m3JT/final_report.git`

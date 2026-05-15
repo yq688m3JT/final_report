@@ -1,0 +1,7 @@
+Approach,Avg Reward,Time
+Optimal (VI),-378.83,0.24
+Greedy,-391.93,0.22
+SARSA,-444.43,0.85
+Static,-448.48,0.20
+Q-Learning,-455.82,1.16
+Monte Carlo,-458.65,5.81

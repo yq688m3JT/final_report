@@ -1,6 +1,7 @@
 import numpy as np
 import time
 import random
+from pathlib import Path
 
 # --- Environment Setup ---
 class TrafficEnv:
@@ -247,9 +248,11 @@ if __name__ == "__main__":
         print(f"{name:20}: Reward: {avg_last_1000:.2f}, Time: {times[name]:.2f}s")
 
     # Save summary for updates
-    with open("results_summary.txt", "w") as f:
+    output_path = Path(__file__).with_name("results_summary.txt")
+    with output_path.open("w") as f:
         f.write("Approach | Avg Reward (Last 1k) | Execution Time (s)\n")
         f.write("-" * 55 + "\n")
         for name, rewards in results.items():
             avg_last_1000 = np.mean(rewards[-1000:])
             f.write(f"{name:20} | {avg_last_1000:18.2f} | {times[name]:18.2f}\n")
+    print(f"\nSaved stochastic run summary to {output_path}")
