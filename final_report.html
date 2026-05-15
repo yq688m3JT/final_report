@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>SmartFlow Final Project Report</title>
+  <style>
+    @page { size: Letter; margin: 0.62in 0.68in; }
+    body { font-family: Arial, Helvetica, sans-serif; color: #111; line-height: 1.24; font-size: 10.6pt; }
+    h1 { font-size: 17pt; margin: 0 0 5px; }
+    h2 { font-size: 12.2pt; margin: 13px 0 4px; }
+    p { margin: 0 0 6px; }
+    .meta { color: #444; margin-bottom: 8px; }
+    table { border-collapse: collapse; width: 100%; margin: 6px 0 8px; font-size: 9.5pt; }
+    th, td { border: 1px solid #999; padding: 4px 5px; vertical-align: top; }
+    th { background: #eceff3; }
+    .appendix { page-break-before: always; }
+    .small { font-size: 9.6pt; }
+    img { max-width: 100%; margin: 5px 0 9px; }
+  </style>
+</head>
+<body>
+  <h1>SmartFlow: Adaptive Traffic Signal Control with Reinforcement Learning</h1>
+  <p class="meta">Final project report. Code repository: <a href="https://github.com/yq688m3JT/final_report">https://github.com/yq688m3JT/final_report</a></p>
+
+  <h2>Problem and Motivation</h2>
+  <p>Urban traffic signals are a sequential decision problem: each green phase relieves one movement while delaying others, and the best action depends on future arrivals as much as the current queue. The slide presentation framed this as SmartFlow, a tabular reinforcement-learning controller for an intersection with North-South and East-West traffic. This report first validates the slide experiment, then extends it to a small network that better resembles real city operation.</p>
+
+  <h2>Slide Experiment: Single-Intersection MDP</h2>
+  <p>The original model is a discrete-time Markov decision process. The state is <b>(Q_NS, Q_EW, phase)</b>, where each queue is bucketed into Low, Medium, or High and the phase is either NS-green or EW-green. The action is <b>stay</b> or <b>switch</b>. The reward is <b>R = -(Q_NS + Q_EW) - C I(switch)</b>, so the controller is penalized for total waiting vehicles and for unnecessary phase changes. This matches the slide content and the original code in <code>legacy_efficiency_experiment.py</code>.</p>
+  <p>The validation run confirms the slide's qualitative result: adaptive RL improves over fixed-time control, while value iteration is the full-information ceiling and the greedy heuristic is unusually strong in the two-phase toy setting because it sees exact local queue counts.</p>
+
+  <table>
+    <tr><th>Approach</th><th>Average reward, last 1,000 episodes</th><th>Interpretation</th></tr>
+    <tr><td>Optimal value iteration</td><td>-378.92</td><td>Best full-state planning baseline.</td></tr>
+    <tr><td>Greedy heuristic</td><td>-394.84</td><td>Strong local oracle for a simple two-phase intersection.</td></tr>
+    <tr><td>Monte Carlo</td><td>-430.46</td><td>Learned adaptive policy; higher variance.</td></tr>
+    <tr><td>Q-learning</td><td>-443.72</td><td>Learned adaptive policy; beats static in this run.</td></tr>
+    <tr><td>SARSA</td><td>-453.93</td><td>On-policy learner close to static under the fixed seed.</td></tr>
+    <tr><td>Static fixed cycle</td><td>-456.24</td><td>Traditional non-adaptive baseline.</td></tr>
+  </table>
+
+  <h2>Network Extension: Real-City Traffic-Light System</h2>
+  <p>The extension changes the project from one isolated intersection into a 3x3 city grid. Vehicles enter from the grid boundary, follow through and turning routes, queue at intersections, and exit at the opposite side. Each intersection has a capacity limit, so a green light can fail to discharge vehicles when the downstream intersection is full. This spillback behavior is the main reason real traffic networks are difficult: serving the longest local queue is not always good if it pushes cars into a blocked downstream link.</p>
+  <p>The extended RL controller uses a shared tabular Q-function across intersections. Its local state includes NS demand, EW demand, current phase, and a downstream-congestion bucket. The action remains stay or switch. The training reward penalizes total network queue, blocked movements, and switching. This keeps the model close to the original slide logic while adding the missing network effect: coordination through downstream awareness.</p>
+
+  <h2>Experimental Design</h2>
+  <p>I compared four controllers over 80 evaluation episodes after training: a traditional fixed-time cycle, a greedy longest-queue rule, a max-pressure heuristic, and the trained tabular RL controller. Demand varies during each episode with a rush-hour pulse and a lane bias, so the system is non-stationary. The primary metrics are average network queue, completed-trip delay, throughput, and number of phase switches.</p>
+  <p>The key claim is supported against the traditional fixed-time algorithm: RL reduces average network queue from 42.96 to 21.70 vehicles, a 49.5% improvement, and reduces mean completed-trip delay from 15.45 to 8.29 time steps, a 46.4% improvement. Greedy and max-pressure are close to RL in this compact grid, which is an honest limitation and also a useful finding: as the baseline receives more real-time state information, the performance gap narrows.</p>
+
+  <table>
+    <tr><th>Controller</th><th>Avg. queue</th><th>Avg. delay</th><th>Throughput</th><th>Switches</th></tr>
+    <tr><td>Static fixed-time</td><td>42.96</td><td>15.45</td><td>692.80</td><td>180.00</td></tr>
+    <tr><td>Greedy longest-queue</td><td>21.17</td><td>8.12</td><td>707.25</td><td>464.10</td></tr>
+    <tr><td>Max-pressure heuristic</td><td>21.90</td><td>8.36</td><td>706.74</td><td>506.53</td></tr>
+    <tr><td>Tabular RL network controller</td><td>21.70</td><td>8.29</td><td>706.00</td><td>540.00</td></tr>
+  </table>
+
+  <h2>Conclusion</h2>
+  <p>The original presentation result is real: the project code implements an MDP traffic-signal controller and shows that learned adaptive control can outperform a fixed-cycle baseline. The network extension strengthens the project by testing the same idea in a more realistic setting with interacting intersections, time-varying demand, route movement, and spillback. The learned RL controller performs much better than traditional fixed-time signal timing and approaches the performance of stronger state-aware heuristics. Future work should replace queue buckets with continuous observations and use deep RL or multi-agent actor-critic methods so the controller can coordinate across larger city networks without hand-designed discretization.</p>
+
+  <div class="appendix">
+    <h1>Appendix: Experiment Details and Outputs</h1>
+    <h2>A. Code Structure</h2>
+    <p class="small"><code>smartflow_experiments.py</code> contains both experiments, saves JSON/CSV results, and generates comparison figures. <code>legacy_efficiency_experiment.py</code> preserves the original slide code. The repository is public and linked in the report header.</p>
+    <h2>B. Network Result Files</h2>
+    <p class="small">Machine-readable outputs are saved in <code>results/slide_validation.json</code>, <code>results/network_extension.json</code>, and <code>results/network_extension.csv</code>. Figures are saved in <code>figures/</code> when the script is run.</p>
+    <h2>C. Notes on Interpretation</h2>
+    <p class="small">The single-intersection greedy baseline is not a traditional deployed timing plan; it is a real-time heuristic with exact local queue knowledge. For that reason, the main traditional comparison in the final claim is fixed-time control. The network experiment adds downstream congestion to show why RL becomes more valuable as the traffic system becomes more complex.</p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "Q-Learning": {
+    "avg_reward_last_1000": -443.721,
+    "runtime_seconds": 1.550806999206543
+  },
+  "SARSA": {
+    "avg_reward_last_1000": -453.925,
+    "runtime_seconds": 0.899590015411377
+  },
+  "Monte Carlo": {
+    "avg_reward_last_1000": -430.459,
+    "runtime_seconds": 5.9095752239227295
+  },
+  "Optimal (VI)": {
+    "avg_reward_last_1000": -378.918,
+    "runtime_seconds": 0.2677648067474365
+  },
+  "Static (Baseline)": {
+    "avg_reward_last_1000": -456.238,
+    "runtime_seconds": 0.22584891319274902
+  },
+  "Greedy (Heuristic)": {
+    "avg_reward_last_1000": -394.838,
+    "runtime_seconds": 0.25559020042419434
+  }
+}
