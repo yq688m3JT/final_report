@@ -13,4 +13,4 @@
 
 ## Part II Evaluation Summary
 
-The canonical output is `experiments/complex_network/results_complex.csv`. In the verified local run, DQN achieved the highest average reward and the lowest average delay. Greedy achieved high throughput, but it also produced much higher delay and switching frequency because it reacted to visible queues without anticipating delayed downstream arrivals.
+The evaluation output is stored in `experiments/complex_network/results_complex.csv`. DQN achieved the highest average reward and the lowest average delay. Greedy achieved high throughput, but it also produced much higher delay and switching frequency because it reacted to visible queues without anticipating delayed downstream arrivals.
