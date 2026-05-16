@@ -6,7 +6,7 @@ from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Inches, Pt
+from docx.shared import Inches, Pt, RGBColor
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,96 +15,76 @@ FIG = REPORT / "figures"
 OUT = REPORT / "final_report.docx"
 
 
-def set_times(run, size=12, bold=False, italic=False):
-    run.font.name = "Times New Roman"
-    run._element.rPr.rFonts.set(qn("w:ascii"), "Times New Roman")
-    run._element.rPr.rFonts.set(qn("w:hAnsi"), "Times New Roman")
+BLUE = RGBColor(31, 78, 121)
+GRAY = RGBColor(89, 89, 89)
+
+
+def set_font(run, size=11, bold=False, italic=False, color=None):
+    run.font.name = "Calibri"
+    run._element.rPr.rFonts.set(qn("w:ascii"), "Calibri")
+    run._element.rPr.rFonts.set(qn("w:hAnsi"), "Calibri")
     run.font.size = Pt(size)
     run.bold = bold
     run.italic = italic
+    if color is not None:
+        run.font.color.rgb = color
 
 
-def add_page_number(paragraph):
-    run = paragraph.add_run("Tang ")
-    set_times(run)
-    fld_begin = OxmlElement("w:fldChar")
-    fld_begin.set(qn("w:fldCharType"), "begin")
-    instr = OxmlElement("w:instrText")
-    instr.set(qn("xml:space"), "preserve")
-    instr.text = "PAGE"
-    fld_end = OxmlElement("w:fldChar")
-    fld_end.set(qn("w:fldCharType"), "end")
-    run._r.append(fld_begin)
-    run._r.append(instr)
-    run._r.append(fld_end)
-
-
-def setup_mla(doc):
+def setup_document(doc):
     section = doc.sections[0]
-    section.top_margin = Inches(1)
-    section.bottom_margin = Inches(1)
-    section.left_margin = Inches(1)
-    section.right_margin = Inches(1)
-    section.header_distance = Inches(0.5)
+    section.top_margin = Inches(0.8)
+    section.bottom_margin = Inches(0.8)
+    section.left_margin = Inches(0.85)
+    section.right_margin = Inches(0.85)
 
     normal = doc.styles["Normal"]
-    normal.font.name = "Times New Roman"
-    normal.font.size = Pt(12)
-    normal.paragraph_format.line_spacing = 2.0
-    normal.paragraph_format.space_before = Pt(0)
-    normal.paragraph_format.space_after = Pt(0)
+    normal.font.name = "Calibri"
+    normal.font.size = Pt(11)
+    normal.paragraph_format.line_spacing = 1.15
+    normal.paragraph_format.space_after = Pt(6)
 
-    header = section.header.paragraphs[0]
-    header.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    add_page_number(header)
-
-
-def add_mla_paragraph(doc, text, first_line=True):
-    p = doc.add_paragraph()
-    p.paragraph_format.line_spacing = 2.0
-    p.paragraph_format.space_before = Pt(0)
-    p.paragraph_format.space_after = Pt(0)
-    if first_line:
-        p.paragraph_format.first_line_indent = Inches(0.5)
-    run = p.add_run(text)
-    set_times(run)
-    return p
+    for name, size, color in [
+        ("Heading 1", 15, BLUE),
+        ("Heading 2", 12.5, BLUE),
+        ("Heading 3", 11.5, BLUE),
+    ]:
+        style = doc.styles[name]
+        style.font.name = "Calibri"
+        style.font.size = Pt(size)
+        style.font.bold = True
+        style.font.color.rgb = color
+        style.paragraph_format.space_before = Pt(8)
+        style.paragraph_format.space_after = Pt(4)
+        style.paragraph_format.keep_with_next = True
 
 
-def add_plain_line(doc, text):
-    p = doc.add_paragraph()
-    p.paragraph_format.line_spacing = 2.0
-    p.paragraph_format.space_before = Pt(0)
-    p.paragraph_format.space_after = Pt(0)
-    run = p.add_run(text)
-    set_times(run)
-    return p
-
-
-def add_centered_title(doc, text):
+def add_title(doc):
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.line_spacing = 2.0
-    p.paragraph_format.space_before = Pt(0)
-    p.paragraph_format.space_after = Pt(0)
-    run = p.add_run(text)
-    set_times(run)
-    return p
+    p.paragraph_format.space_after = Pt(2)
+    run = p.add_run("SmartFlow: Adaptive Traffic Signal Control with Reinforcement Learning")
+    set_font(run, size=18, bold=True, color=BLUE)
 
-
-def add_section_title(doc, text):
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.line_spacing = 2.0
-    p.paragraph_format.space_before = Pt(0)
-    p.paragraph_format.space_after = Pt(0)
-    run = p.add_run(text)
-    set_times(run, bold=True)
+    p.paragraph_format.space_after = Pt(12)
+    run = p.add_run("Zhonghuan Tang")
+    set_font(run, size=11, color=GRAY)
+
+
+def add_heading(doc, text, level=1):
+    p = doc.add_paragraph(style=f"Heading {level}")
+    p.add_run(text)
     return p
 
 
-def page_break(doc):
-    doc.add_page_break()
+def add_body(doc, text):
+    p = doc.add_paragraph()
+    p.paragraph_format.line_spacing = 1.15
+    p.paragraph_format.space_after = Pt(6)
+    run = p.add_run(text)
+    set_font(run, size=11)
+    return p
 
 
 def set_cell_text(cell, text, bold=False, align=WD_ALIGN_PARAGRAPH.LEFT):
@@ -114,7 +94,7 @@ def set_cell_text(cell, text, bold=False, align=WD_ALIGN_PARAGRAPH.LEFT):
     p.paragraph_format.line_spacing = 1.0
     p.paragraph_format.space_after = Pt(0)
     run = p.add_run(str(text))
-    set_times(run, size=10, bold=bold)
+    set_font(run, size=9.5, bold=bold)
     cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
 
 
@@ -159,7 +139,7 @@ def set_table_widths(table, widths):
 
 
 def add_appendix_table(doc, title, headers, rows, widths):
-    add_section_title(doc, title)
+    add_heading(doc, title, level=2)
     table = doc.add_table(rows=1, cols=len(headers))
     table.autofit = False
     set_table_borders(table)
@@ -173,72 +153,98 @@ def add_appendix_table(doc, title, headers, rows, widths):
             align = WD_ALIGN_PARAGRAPH.LEFT if i == 0 else WD_ALIGN_PARAGRAPH.CENTER
             set_cell_text(cells[i], value, align=align)
     set_table_widths(table, widths)
-    doc.add_paragraph()
 
 
 def add_appendix_image(doc, title, image_name, width=5.8):
-    add_section_title(doc, title)
+    add_heading(doc, title, level=2)
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.line_spacing = 1.0
+    p.paragraph_format.space_after = Pt(8)
     p.add_run().add_picture(str(FIG / image_name), width=Inches(width))
-    doc.add_paragraph()
 
 
 def build():
     doc = Document()
-    setup_mla(doc)
+    setup_document(doc)
     part1 = pd.read_csv(ROOT / "experiments" / "simple_intersection" / "presentation_results.csv")
     part2 = pd.read_csv(ROOT / "experiments" / "complex_network" / "results_complex.csv")
 
-    add_plain_line(doc, "Zhonghuan Tang")
-    add_plain_line(doc, "Instructor")
-    add_plain_line(doc, "Final Project Report")
-    add_plain_line(doc, "15 May 2026")
-    add_centered_title(doc, "SmartFlow: Adaptive Traffic Signal Control with Reinforcement Learning")
-    add_mla_paragraph(
+    add_title(doc)
+
+    add_heading(doc, "Introduction")
+    add_body(
         doc,
-        "Urban congestion is a practical example of sequential decision-making under uncertainty. A traffic signal does not make one isolated prediction and then stop; it must keep choosing whether to hold or change a phase while vehicle arrivals fluctuate over time. Traditional fixed-cycle control treats this uncertainty as background noise, so it can waste green time when one approach is empty and can under-serve a lane when demand rises unexpectedly. Reinforcement learning is useful for this type of problem because it frames control as interaction with an environment. The controller receives a state, chooses an action, observes a reward, and gradually improves a policy that accounts for long-term consequences rather than only the next moment.",
+        "Urban traffic control is a useful setting for studying sequential decision-making because signal timing affects both the vehicles currently waiting and the congestion that will appear later. A fixed-cycle traffic signal follows the same schedule even when demand changes, which means it may waste green time on an empty lane or fail to respond when one direction becomes crowded. Adaptive control is meant to solve this problem by changing signal behavior in response to observed conditions. Reinforcement learning is a natural approach because it lets a controller improve through interaction with a traffic environment rather than relying only on a rule written in advance.",
     )
-    add_mla_paragraph(
+    add_body(
         doc,
-        "The original SmartFlow presentation developed this idea through a single-intersection Markov Decision Process. The state was defined as S = (Q_NS, Q_EW, Phase), where Q_NS and Q_EW represent the north-south and east-west queues and Phase records the current green direction. To keep tabular methods feasible, queue lengths were discretized into low, medium, and high buckets: low for 0-3 vehicles, medium for 4-8 vehicles, and high for 9 or more vehicles. The action space contained two choices, Stay and Switch. The reward was R = -(Q_NS + Q_EW) - C, with the switching cost C included to discourage unsafe oscillation between phases.",
-    )
-    add_mla_paragraph(
-        doc,
-        "This first experiment compared Q-Learning, SARSA, Monte Carlo learning, a static fixed-cycle baseline, a greedy longest-queue heuristic, and a Value Iteration reference. Its purpose was not to claim that a small tabular learner could solve urban traffic at full scale. Instead, it tested whether reinforcement learning could learn an adaptive signal policy in a controlled setting and whether the MDP formulation captured the essential tradeoff between current waiting time and future congestion.",
+        "The SmartFlow project began with a simple single-intersection experiment. The goal of that first experiment was to test whether reinforcement learning could learn a useful traffic signal policy and how its performance compared with common baselines. The project then extended the same idea to a more complex two-intersection corridor. This extension is important because real traffic networks are rarely isolated. A decision at one signal can affect queues at another signal several steps later. That delayed interaction is exactly where a long-term learning method should become more valuable than a purely reactive heuristic.",
     )
 
-    page_break(doc)
-    add_mla_paragraph(
+    add_heading(doc, "Part I: Original Single-Intersection Experiment")
+    add_body(
         doc,
-        "The reported results from the presentation show a careful but limited success. Value Iteration and the greedy heuristic achieved the strongest rewards in the simple environment, while SARSA slightly outperformed static timing. This matters because the static baseline represents the type of rigid control that adaptive systems are meant to improve. At the same time, the strong greedy result is not surprising. In a single two-phase intersection, a longest-queue rule has direct access to the exact local queue information that determines most short-term outcomes. When the world is that small, a reactive rule can look nearly intelligent because the relevant future is close to the present.",
+        "The original experiment defined the intersection as a Markov Decision Process. The state was S = (Q_NS, Q_EW, Phase), where Q_NS is the north-south queue, Q_EW is the east-west queue, and Phase indicates the current green-light direction. To make tabular learning manageable, each queue was placed into one of three buckets: low traffic for 0 to 3 vehicles, medium traffic for 4 to 8 vehicles, and high traffic for 9 or more vehicles. This representation reduces the state space while still giving the agent basic information about which direction is more congested.",
     )
-    add_mla_paragraph(
+    add_body(
         doc,
-        "The limitation of the first experiment is therefore structural. The RL agents were intentionally constrained by coarse state buckets, while the greedy controller reacted to precise local queue counts. The intersection also had no neighboring signals, no platoons traveling between signals, and no downstream spillback. Under those conditions, a heuristic with perfect local information can remain competitive even though it has no real planning ability. This is why the presentation's conclusion should be read with nuance: reinforcement learning learned useful adaptive behavior, but the benchmark was too simple to reveal the full value of long-horizon optimization.",
+        "The action space contained two choices: Stay or Switch. Stay means the signal keeps the current green phase, while Switch means the signal changes to the other direction. The reward function was R = -(Q_NS + Q_EW) - C, where the first term penalizes waiting vehicles and the switching cost C discourages the controller from changing phases too frequently. This design captures the main tradeoff in signal control. The agent should reduce queues, but it should not create unrealistic or unsafe oscillation by switching at every time step.",
     )
-    add_mla_paragraph(
+    add_body(
         doc,
-        "The extension experiment was designed to test that missing dimension. Instead of one isolated intersection, the new environment uses a coordinated two-intersection corridor. Vehicles released from Intersection A travel toward Intersection B and arrive after a delay. Demand changes by regime, with periods of low traffic, bursts, and directional imbalance. Both signals choose whether to stay or switch, so the joint action space has four possibilities. The reward is system-level: it penalizes total queue length, switching, and spillback while rewarding throughput. This design makes the downstream effect of an upstream decision visible only after several steps.",
+        "The algorithms compared in the original presentation were Q-Learning, SARSA, Monte Carlo learning, static fixed-cycle timing, a greedy longest-queue heuristic, and Value Iteration as an optimal reference. These methods create a useful range of comparisons. Static timing represents a simple non-adaptive baseline. Greedy timing represents a strong local heuristic because it directly serves the longer current queue. Value Iteration represents the best policy available under the simplified model assumptions. The reinforcement learning methods show whether an agent can learn adaptive behavior from repeated simulated experience.",
     )
-
-    page_break(doc)
-    add_mla_paragraph(
+    add_body(
         doc,
-        "This richer environment changes the meaning of good control. A local greedy policy can clear the largest visible queue at each intersection, but it cannot easily anticipate vehicles that have already been released upstream and are still in transit. A decision that looks efficient at Intersection A can overload Intersection B several steps later. The DQN agent, by contrast, receives a fuller state representation that includes both intersections, the current phases, the in-transit vehicle bucket, and the demand regime. Its advantage comes from learning coordination patterns that connect present actions with delayed network consequences.",
-    )
-    add_mla_paragraph(
-        doc,
-        "The extension results support the project's broader argument. In the coordinated corridor, the DQN policy achieved much lower average queue and delay than static timing, local greedy control, and a threshold heuristic. Greedy still moved many vehicles, but it also switched frequently and produced higher downstream delay because it reacted to visible queues without preparing for platoons arriving later. The result does not mean that reinforcement learning is always superior to every heuristic. It shows something more precise: RL becomes more valuable when the traffic system contains delayed interactions, coordination requirements, and network effects that a reactive local rule does not represent.",
-    )
-    add_mla_paragraph(
-        doc,
-        "SmartFlow therefore offers a coherent progression from a simple MDP demonstration to a more realistic control argument. The original experiment validates that RL can learn adaptive signal behavior and slightly outperform static timing even with a coarse tabular state. The extension explains why richer RL methods become important as the traffic problem becomes more networked. Future work should move toward continuous-state deep reinforcement learning, multi-agent control across larger road networks, richer sensing, and safety constraints that would be necessary before any real deployment. The main lesson is not that learning replaces traffic engineering, but that learning-based control can complement it when the environment is too dynamic and delayed for purely myopic rules.",
+        "The preserved presentation results show that SARSA slightly outperformed static timing, while the greedy heuristic and Value Iteration performed better than the learned tabular agents. This result should be interpreted carefully. SARSA beating static timing supports the basic claim that reinforcement learning can learn an adaptive signal policy. However, greedy performing strongly does not mean reinforcement learning is useless. In a single two-phase intersection, the current local queue is almost the whole problem. A longest-queue rule has direct access to that information, so it can be very effective without learning any long-term strategy.",
     )
 
-    page_break(doc)
-    add_section_title(doc, "Appendix")
+    add_heading(doc, "Why the Simple Experiment Is Limited")
+    add_body(
+        doc,
+        "The main limitation of the first experiment is that the environment is too local. There are no neighboring intersections, no vehicles traveling between signals, and no downstream spillback. The greedy heuristic only needs to ask which queue is longer right now. Because there is no network effect, that short-term decision often lines up with good performance. The reinforcement learning agents also used coarse buckets instead of exact queue counts, so they had less detailed state information than the greedy rule. This creates a perception gap: the heuristic appears stronger partly because it sees exact local queues in a very simple environment.",
+    )
+    add_body(
+        doc,
+        "This limitation motivated the second experiment. A stronger test of reinforcement learning should include delayed consequences and coordination. In real corridors, releasing vehicles from one intersection can create a platoon that arrives at another intersection later. If the downstream light is not prepared, the released vehicles may create congestion or spillback. A local greedy controller cannot easily anticipate that future arrival if it only reacts to the queue currently visible at each intersection. A reinforcement learning controller can use a fuller state and learn that an upstream action may require a downstream response several steps later.",
+    )
+
+    add_heading(doc, "Part II: Coordinated Corridor Extension")
+    add_body(
+        doc,
+        "The extension experiment uses a two-intersection corridor. Intersection A is upstream of Intersection B, and vehicles released from A reach B after a four-step delay. The state includes bucketed queues for both directions at both intersections, the current signal phase at A, the current signal phase at B, an in-transit vehicle bucket, and a demand-regime indicator. The action space contains four joint actions: both signals stay, A stays while B switches, A switches while B stays, or both signals switch. This creates a larger and more coordinated decision problem than the original single-intersection case.",
+    )
+    add_body(
+        doc,
+        "The reward is also more system-oriented. It penalizes total queue length, phase switching, and spillback while giving credit for throughput. This is important because raw throughput alone can be misleading. A controller might release many vehicles from A, but if B is not ready to serve them, the network delay can still become worse. The experiment therefore rewards policies that manage the corridor as a whole rather than policies that only clear one visible queue at a time.",
+    )
+    add_body(
+        doc,
+        "For the reinforcement learning method, the project uses a Deep Q-Network. A DQN is appropriate because the coordinated corridor has a larger state representation than the original tabular experiment. The model receives the flattened state vector and outputs Q-values for the four joint actions. Training uses experience replay, a target network, and epsilon-greedy exploration. The baselines include static fixed timing, local greedy timing, and a threshold heuristic. Static timing provides a simple control reference. Greedy timing reacts to the currently larger local queue. The threshold heuristic switches only when the opposing queue is larger by a specified margin.",
+    )
+
+    add_heading(doc, "Results and Interpretation")
+    add_body(
+        doc,
+        "The complex corridor results support the broader argument of the project. In the coordinated setting, the DQN policy achieved lower average queue and lower average delay than static timing, local greedy timing, and the threshold heuristic. The local greedy baseline still moved many vehicles, but it also switched frequently and produced higher system delay. This pattern is meaningful because it shows the weakness of purely reactive control. Greedy can clear what it sees immediately, but it does not plan for vehicles that are already moving through the corridor and will arrive downstream in the near future.",
+    )
+    add_body(
+        doc,
+        "The difference between Part I and Part II is the main lesson. In the simple intersection, greedy remains competitive because the environment is small and the current queue is highly informative. In the coordinated corridor, the current queue is no longer enough. A good policy must understand timing, delayed arrivals, and the relationship between upstream and downstream phases. Reinforcement learning becomes more valuable because it can optimize long-term system behavior instead of only reacting to the largest local queue.",
+    )
+    add_body(
+        doc,
+        "This does not mean that reinforcement learning should be described as universally better than heuristic traffic control. Heuristics are often fast, interpretable, and effective in simple settings. The correct conclusion is more specific: reinforcement learning has a structural advantage when the environment contains delayed effects, coordination requirements, and network interactions that are difficult to encode in a simple rule. The extension experiment was designed around exactly those features, so it gives a more convincing reason to continue developing learning-based adaptive traffic control.",
+    )
+
+    add_heading(doc, "Conclusion")
+    add_body(
+        doc,
+        "SmartFlow shows a clear progression from a basic MDP demonstration to a richer traffic-control experiment. The original presentation established the core formulation and showed that SARSA could improve on static timing in a single-intersection environment. The extension then showed why the value of reinforcement learning becomes clearer in a coordinated corridor, where decisions have delayed downstream consequences. Future work should expand the environment to larger road networks, continuous state representations, multi-agent signal control, and more realistic safety constraints. The project’s overall conclusion is that reinforcement learning is most promising when traffic control requires coordination over time, not merely reaction to the queue visible at the present moment.",
+    )
+
+    doc.add_page_break()
+    add_heading(doc, "Appendix", level=1)
     add_appendix_table(
         doc,
         "Table A1. Preserved Presentation Results for Part I",
@@ -269,23 +275,17 @@ def build():
     add_appendix_image(doc, "Figure A4. Part II Reward Comparison", "part2_reward_comparison.png", width=5.8)
     add_appendix_image(doc, "Figure A5. Part II Delay Comparison", "part2_delay_comparison.png", width=5.8)
 
-    page_break(doc)
-    add_section_title(doc, "Works Cited")
-    works = [
-        "Mnih, Volodymyr, et al. \"Human-Level Control through Deep Reinforcement Learning.\" Nature, vol. 518, 2015, pp. 529-533.",
+    doc.add_page_break()
+    add_heading(doc, "References", level=1)
+    references = [
+        "Mnih, Volodymyr, et al. “Human-Level Control through Deep Reinforcement Learning.” Nature, vol. 518, 2015, pp. 529-533.",
         "Rummery, Gavin A., and Mahesan Niranjan. On-Line Q-Learning Using Connectionist Systems. Cambridge University Engineering Department, 1994.",
         "Sutton, Richard S., and Andrew G. Barto. Reinforcement Learning: An Introduction. 2nd ed., MIT Press, 2018.",
-        "Watkins, Christopher J. C. H., and Peter Dayan. \"Q-Learning.\" Machine Learning, vol. 8, 1992, pp. 279-292.",
-        "Wei, Hua, et al. \"PressLight: Learning Max Pressure Control to Coordinate Traffic Signals in Arterial Network.\" Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, 2019, pp. 1290-1298.",
+        "Watkins, Christopher J. C. H., and Peter Dayan. “Q-Learning.” Machine Learning, vol. 8, 1992, pp. 279-292.",
+        "Wei, Hua, et al. “PressLight: Learning Max Pressure Control to Coordinate Traffic Signals in Arterial Network.” Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, 2019, pp. 1290-1298.",
     ]
-    for work in works:
-        p = doc.add_paragraph()
-        p.paragraph_format.line_spacing = 2.0
-        p.paragraph_format.space_after = Pt(0)
-        p.paragraph_format.left_indent = Inches(0.5)
-        p.paragraph_format.first_line_indent = Inches(-0.5)
-        run = p.add_run(work)
-        set_times(run)
+    for ref in references:
+        add_body(doc, ref)
 
     doc.save(OUT)
     print(f"Wrote {OUT}")
