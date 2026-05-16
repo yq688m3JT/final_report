@@ -274,6 +274,8 @@ def build():
     add_appendix_image(doc, "Figure A3. Coordinated Corridor Diagram", "part2_network_diagram.png", width=5.8)
     add_appendix_image(doc, "Figure A4. Part II Reward Comparison", "part2_reward_comparison.png", width=5.8)
     add_appendix_image(doc, "Figure A5. Part II Delay Comparison", "part2_delay_comparison.png", width=5.8)
+    add_appendix_image(doc, "Figure A6. Part II Queue Comparison", "part2_queue_comparison.png", width=5.8)
+    add_appendix_image(doc, "Figure A7. Part II Throughput and Switching Tradeoff", "part2_throughput_switching.png", width=6.2)
 
     doc.add_page_break()
     add_heading(doc, "References", level=1)
