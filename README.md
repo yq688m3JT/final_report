@@ -37,10 +37,10 @@ The verified run writes `experiments/complex_network/results_complex.csv` and re
 ## Build the PDF Report
 
 ```bash
-python report/build_report_pdf.py
+python report/build_report_docx.py
 ```
 
-The generated deliverable is `report/final_report.pdf`. The main body is pages 1-3; references and appendix material begin after page 3.
+The Word deliverable is `report/final_report.docx`. The PDF deliverable is `report/final_report.pdf`; this version was exported from the DOCX using Microsoft Word. The main body is pages 1-3; references and appendix material begin after page 3.
 
 ## GitHub Destination
 

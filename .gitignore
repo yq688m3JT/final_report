@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 build_preview/
+report/final_report_docx.pdf
 
 # Original local source materials used to prepare the final submission.
 Group19.pdf
