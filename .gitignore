@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 build_preview/
 report/final_report_docx.pdf
+experiments/simple_intersection/results_summary.txt
 
 # Original local source materials used to prepare the final submission.
 Group19.pdf

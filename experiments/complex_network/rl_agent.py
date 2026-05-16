@@ -90,5 +90,5 @@ class DQNAgent:
         torch.save(self.policy.state_dict(), path)
 
     def load(self, path):
-        self.policy.load_state_dict(torch.load(path, map_location="cpu"))
+        self.policy.load_state_dict(torch.load(path, map_location="cpu", weights_only=True))
         self.target.load_state_dict(self.policy.state_dict())
